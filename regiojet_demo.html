@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RegioJet Monitor - Live Demo</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            font-family: 'Segoe UI', sans-serif;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 800px; margin: 0 auto; }
+
+        h1 {
+            text-align: center;
+            color: #ffd700;
+            margin-bottom: 10px;
+            font-size: 1.8rem;
+        }
+        .subtitle {
+            text-align: center;
+            color: #888;
+            margin-bottom: 30px;
+        }
+
+        .route-header {
+            background: #0f3460;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .route-header h2 { color: #00d9ff; font-size: 1.2rem; }
+        .live-badge {
+            background: #e74c3c;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .bus-card {
+            background: #1e3a5f;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #00d9ff;
+            transition: transform 0.2s;
+        }
+        .bus-card:hover { transform: translateX(5px); }
+        .bus-card.delayed { border-left-color: #e74c3c; }
+        .bus-card.on-time { border-left-color: #2ecc71; }
+
+        .bus-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ffd700;
+        }
+        .bus-route { color: #aaa; margin: 5px 0; }
+
+        .bus-info {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .info-box {
+            background: rgba(0,0,0,0.3);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .info-label { font-size: 0.75rem; color: #888; }
+        .info-value { font-size: 1.1rem; font-weight: bold; margin-top: 5px; }
+        .info-value.on-time { color: #2ecc71; }
+        .info-value.delayed { color: #e74c3c; }
+
+        .stats-bar {
+            background: #0f3460;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            text-align: center;
+        }
+        .stat-num { font-size: 2rem; font-weight: bold; color: #ffd700; }
+        .stat-label { font-size: 0.8rem; color: #888; }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #555;
+            font-size: 0.8rem;
+        }
+        .footer a { color: #00d9ff; }
+
+        .refresh-btn {
+            display: block;
+            margin: 20px auto;
+            padding: 15px 40px;
+            background: linear-gradient(90deg, #ffd700, #ff9500);
+            border: none;
+            border-radius: 30px;
+            color: #000;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        .refresh-btn:hover { transform: scale(1.05); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>RegioJet Delay Monitor</h1>
+        <p class="subtitle">Real-time tracking systém by Petr Tomeš</p>
+
+        <div class="route-header">
+            <h2>Karlovy Vary Terminal &rarr; Sokolov Terminal</h2>
+            <span class="live-badge">LIVE</span>
+        </div>
+
+        <!-- Bus 1 -->
+        <div class="bus-card on-time">
+            <div class="bus-number">Bus 256</div>
+            <div class="bus-route">Praha &rarr; Cheb (25.11.2025)</div>
+            <div class="bus-info">
+                <div class="info-box">
+                    <div class="info-label">ODJEZD</div>
+                    <div class="info-value">12:45</div>
+                </div>
+                <div class="info-box">
+                    <div class="info-label">STATUS</div>
+                    <div class="info-value on-time">ON TIME</div>
+                </div>
+                <div class="info-box">
+                    <div class="info-label">VOLNÁ MÍSTA</div>
+                    <div class="info-value">17</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bus 2 -->
+        <div class="bus-card on-time">
+            <div class="bus-number">Bus 302</div>
+            <div class="bus-route">Cheb &rarr; Praha (25.11.2025)</div>
+            <div class="bus-info">
+                <div class="info-box">
+                    <div class="info-label">ODJEZD</div>
+                    <div class="info-value">16:00</div>
+                </div>
+                <div class="info-box">
+                    <div class="info-label">STATUS</div>
+                    <div class="info-value on-time">ON TIME</div>
+                </div>
+                <div class="info-box">
+                    <div class="info-label">VOLNÁ MÍSTA</div>
+                    <div class="info-value">14</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bus 3 - Delayed example -->
+        <div class="bus-card delayed">
+            <div class="bus-number">Bus 418</div>
+            <div class="bus-route">Praha &rarr; Cheb (25.11.2025)</div>
+            <div class="bus-info">
+                <div class="info-box">
+                    <div class="info-label">ODJEZD</div>
+                    <div class="info-value">18:45</div>
+                </div>
+                <div class="info-box">
+                    <div class="info-label">STATUS</div>
+                    <div class="info-value delayed">+15 MIN</div>
+                </div>
+                <div class="info-box">
+                    <div class="info-label">VOLNÁ MÍSTA</div>
+                    <div class="info-value">8</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-bar">
+            <div>
+                <div class="stat-num">6</div>
+                <div class="stat-label">Spojů celkem</div>
+            </div>
+            <div>
+                <div class="stat-num" style="color: #2ecc71">5</div>
+                <div class="stat-label">On time</div>
+            </div>
+            <div>
+                <div class="stat-num" style="color: #e74c3c">1</div>
+                <div class="stat-label">Zpožděno</div>
+            </div>
+            <div>
+                <div class="stat-num">83%</div>
+                <div class="stat-label">Spolehlivost</div>
+            </div>
+        </div>
+
+        <button class="refresh-btn" onclick="alert('V plné verzi: python3 monitor_delays.py')">
+            Obnovit data
+        </button>
+
+        <div class="footer">
+            <p>Data: RegioJet Public API | Vytvořil: <strong>Petr Tomeš</strong></p>
+            <p style="margin-top: 10px;">
+                <a href="https://github.com/ptomes1987">GitHub</a> |
+                Python + Bash | Termux Ready
+            </p>
+        </div>
+    </div>
+</body>
+</html>
